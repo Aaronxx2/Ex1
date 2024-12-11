@@ -19,47 +19,47 @@ public class Ex1 {
      * @return
      */
     public static int number2Int(String num) {
-        if (num == null || !num.contains("b")) {
+        if (!isNumber(num)) {
             return -1;
         }
 
-        String numString = "";
-        String baseString = "";
+        // split the chain in 2
+        String[] parts = num.split("b");
+        if (parts.length != 2) {
+            return -1;
+        }
+
+        String numString = parts[0];
+        String basePart = parts[1];
+
+        // find the base
         int baseInt;
-
-        boolean isNumFound = false;
-        for (int i = 0; i < num.length(); i++) {
-            if (num.charAt(i) == 'b') {
-                isNumFound = true;
-                continue;
-            }
-            if (!isNumFound) {
-                numString += num.charAt(i);
-            } else {
-                baseString += num.charAt(i);
-            }
+        if (Character.isDigit(basePart.charAt(0))) {
+            baseInt = Integer.parseInt(basePart); // if the base is a number
+        } else if (basePart.charAt(0) >= 'A' && basePart.charAt(0) <= 'G') {
+            baseInt = basePart.charAt(0) - 'A' + 10; // if teh base is a letter
+        } else {
+            return -1; // Invalid base
         }
 
-        try {
-            baseInt = Integer.parseInt(baseString);
-            if (baseInt < 2 || baseInt > 16) {
-                return -1;
-            }
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-
+        // Converting the number
         int ans = 0;
         for (int j = 0; j < numString.length(); j++) {
-            int digit = Character.getNumericValue(numString.charAt(j));
-            if (digit < 0 || digit >= baseInt) {
-                return -1;
+            char c = numString.charAt(j);
+            int digit;
+            if (Character.isDigit(c)) {
+                digit = c - '0'; // If char is a letter , convert it to its numerical value
+            } else {
+                digit = c - 'A' + 10; // else, calculate the value of the letter
             }
-            ans += digit * (int) Math.pow(baseInt, (numString.length() - j - 1));
+            if (digit < 0 || digit >= baseInt) {
+                return -1; // number not in the base
+            }
+            ans = ans * baseInt + digit;
         }
-
         return ans;
     }
+
 
 
     /**
@@ -69,29 +69,102 @@ public class Ex1 {
      * @return true iff the given String is in a number format
      */
     public static boolean isNumber(String a) {
-        boolean ans = true;
-        // add your code here
+        // check for the validity of the chain
+        if (a == null || a.isEmpty()) {
+            return false;
+        }
 
-        ////////////////////
-        return ans;
+        // if there is no b , it must be in base 10
+        if (!a.contains("b")) {
+            for (int i = 0; i < a.length(); i++) {
+                if (!Character.isDigit(a.charAt(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // split into base and number
+        String[] parts = a.split("b");
+        if (parts.length != 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
+            return false; // invalid format
+        }
+
+        String numberPart = parts[0];
+        String basePart = parts[1];
+
+        // check for the base
+        int base;
+        if (Character.isDigit(basePart.charAt(0))) {
+            base = Integer.parseInt(basePart);
+        } else if (basePart.charAt(0) >= 'A' && basePart.charAt(0) <= 'G') {
+            base = basePart.charAt(0) - 'A' + 10;
+        } else {
+            return false; //wrong base
+        }
+
+        if (base < 2 || base > 16) {
+            return false; // base not in the interval
+        }
+
+        // check for every letter of number part
+        for (int i = 0; i < numberPart.length(); i++) {
+            char c = numberPart.charAt(i);
+            int digit;
+            if (Character.isDigit(c)) {
+                digit = c - '0'; // If char is a number , convert it to its numerical value (from ascii)
+            } else {
+                digit = c - 'A' + 10; // else, calculate the value of the letter
+            }
+            if (digit < 0 || digit >= base) {
+                return false; // invalid base
+            }
+        }
+
+        return true;
     }
+
+
+
 
     /**
-     * Calculate the number representation (in basis base)
-     * of the given natural number (represented as an integer).
-     * If num<0 or base is not in [2,16] the function should return "" (the empty String).
-     *
-     * @param num  the natural number (include 0).
-     * @param base the basis [2,16]
-     * @return a String representing a number (in base) equals to num, or an empty String (in case of wrong input).
-     */
-    public static String int2Number(int num, int base) {
-        String ans = "";
-        // add your code here
+         * Calculate the number representation (in basis base)
+         * of the given natural number (represented as an integer).
+         * If num<0 or base is not in [2,16] the function should return "" (the empty String).
+         *
+         * @param num  the natural number (include 0).
+         * @param base the basis [2,16]
+         * @return a String representing a number (in base) equals to num, or an empty String (in case of wrong input).
+         */
+        public static String int2Number(int num, int base) {
+            String ans = "";
+            if (num < 0 || base < 2 || base > 16) {
+                return ans;
+            }
 
-        ////////////////////
-        return ans;
-    }
+            if (num == 0) {
+                ans = "0b" + base; // Special case for 0
+                return ans;
+            }
+
+            StringBuilder numString = new StringBuilder();
+            int result = num;
+
+            while (result != 0) {
+                int remainder = result % base;
+                if (remainder < 10) {
+                    numString.append((char) ('0' + remainder)); // add number from 1 to 9
+                } else {
+                    numString.append((char) ('A' + (remainder - 10))); // add letters
+                }
+                result /= base;
+            }
+
+            numString.reverse(); // mirror to get the right string
+
+            ans = numString.toString() + "b" + base;
+            return ans;
+        }
 
     /**
      * Checks if the two numbers have the same value.
@@ -99,12 +172,21 @@ public class Ex1 {
      * @param n1 first number
      * @param n2 second number
      * @return true iff the two numbers have the same values.
-     *
+     */
     public static boolean equals(String n1, String n2) {
         boolean ans = true;
-        // add your code here
 
-        ////////////////////
+        if (n1 == null || n2 == null) {
+            ans = false;
+        } else {
+            int value1 = number2Int(n1);
+            int value2 = number2Int(n2);
+
+            if (value2 == -1 || value1 != value2) {
+                ans = false;
+            }
+        }
+
         return ans;
     }
 
@@ -117,10 +199,21 @@ public class Ex1 {
      * @return the index in the array in with the largest number (in value).
      */
     public static int maxIndex(String[] arr) {
-        int ans = 0;
-        // add your code here
+            int ans = -1;
+            int maxValue = Integer.MIN_VALUE;
+            for (int i = 0; i < arr.length; i++) {
+                if(!isNumber(arr[i])){
+                    continue;
+                }
+                if(number2Int(arr[i])>maxValue){
+                    maxValue = number2Int(arr[i]);
+                    ans = i;
 
-        ////////////////////
-        return ans;
+                }
+            }
+
+            return ans; // Return the index of the maximum valid number
+        }
+
     }
-}
+
