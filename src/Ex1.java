@@ -37,7 +37,7 @@ public class Ex1 {
         if (Character.isDigit(basePart.charAt(0))) {
             baseInt = Integer.parseInt(basePart); // if the base is a number
         } else if (basePart.charAt(0) >= 'A' && basePart.charAt(0) <= 'G') {
-            baseInt = basePart.charAt(0) - 'A' + 10; // if teh base is a letter
+            baseInt = basePart.charAt(0) - 'A' + 10; // if the base is a letter
         } else {
             return -1; // Invalid base
         }
