@@ -162,7 +162,7 @@ public class Ex1 {
 
             numString.reverse(); // mirror to get the right string
 
-            ans = numString.toString() + "b" + base;
+            ans = numString + "b" + base;
             return ans;
         }
 
